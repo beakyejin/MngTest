@@ -9,17 +9,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet("/proView")
-public class ProViewServlet extends HttpServlet {
+@WebServlet("/deliView")
+public class DeliViewServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
 		ProductDAO dao = ProductDAO.getInstance();
-		List<ProductVO> list = dao.getProList(); 
-		request.setAttribute("list", list);
+		List<DeliveryVO> list = dao.getDeliveryList();
 		
-		Utils.Dispatcher("상품조회", "proView", request, response);
+		request.setAttribute("list", list);
+		Utils.Dispatcher("배송조회", "deliView", request, response);
 	}
 
 }

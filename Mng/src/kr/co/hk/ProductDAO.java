@@ -47,7 +47,7 @@ public class ProductDAO {
 		return no;
 	}
 
-	public void isnertProduct(ProductVO vo) {
+	public void insertProduct(ProductVO vo) {
 		Connection con = null;
 		PreparedStatement ps = null;
 		
@@ -154,4 +154,207 @@ public class ProductDAO {
 		
 		return vo;
 	}
+
+	public void insertSales(SalesVO vo) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		
+		String sql = " insert into sales "
+				+ " (s_no, p_no, s_quantity, s_price, s_date, d_chk) "
+				+ " values "
+				+ " ( "
+				+ "		(select nvl(max(s_no),100000)+1 from sales)"
+				+ "	, ?, ?, ?, sysdate, 0) ";
+		
+		try {
+			con = DBConnector.getconn();
+			ps = con.prepareStatement(sql);
+			ps.setInt(1, vo.getP_no());
+			ps.setInt(2, vo.getS_quantity());
+			ps.setInt(3, vo.getS_price());
+			
+			ps.execute();
+			
+		} catch (Exception e) {
+			System.out.println("insertSales 에러!");
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(con, ps, null);
+		}
+	}
+
+	public void updateProduct(ProductVO vo) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		
+		String sql = " update product "
+				+ " set "
+				+ "		p_no=?, "
+				+ "		p_name=?, "
+				+ "		p_price=?, "
+				+ "	 	p_info=? "
+				+ " where p_no = ? ";
+		
+		try {
+			con = DBConnector.getconn();
+			ps = con.prepareStatement(sql);
+			ps.setInt(1, vo.getP_no());
+			ps.setString(2, vo.getP_name());
+			ps.setInt(3, vo.getP_price());
+			ps.setString(4, vo.getP_info());
+			ps.setInt(5, vo.getP_no());
+			ps.execute();
+			
+		} catch (Exception e) {
+			System.out.println("updateProduct 에러!");
+			e.printStackTrace();
+		} finally{
+			DBConnector.close(con, ps, null);
+		}
+		
+	}
+
+	public List<SalesVO> getSalesList() {
+		List<SalesVO> list = new ArrayList<SalesVO>();
+		
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		String sql = " select "
+					+" 		b.s_no, a.p_name, a.p_price, " 
+					+" 		b.s_quantity, b.s_price, "
+					+" 		to_char(b.s_date, 'yyyy/mm/dd hh:mm:ss') as s_date "
+					+" from product a "
+					+" join SALES b "
+					+" on a.p_no = b.p_no "
+					+" where b.d_chk = 0 " ; 
+		
+		try {
+			con = DBConnector.getconn();
+			ps = con.prepareStatement(sql);
+			rs = ps.executeQuery();
+			
+			while(rs.next()){
+				SalesVO vo = new SalesVO();
+				vo.setS_no(rs.getInt("s_no"));
+				vo.setP_name(rs.getString("p_name"));
+				vo.setP_price(rs.getInt("p_price"));
+				vo.setS_quantity(rs.getInt("s_quantity"));
+				vo.setS_price(rs.getInt("s_price"));
+				vo.setS_date(rs.getString("s_date"));
+				
+				list.add(vo);
+				
+				System.out.printf("%d %s %d %d %d %s\n"
+						, vo.getS_no(), vo.getP_name(), vo.getP_price() 
+						, vo.getS_quantity(), vo.getS_price(), vo.getS_date());
+			}
+			
+		} catch (Exception e) {
+			System.out.println("getSalesList 에러!");
+			e.printStackTrace();
+		} finally{
+			DBConnector.close(con, ps, rs);
+		}
+		
+		return list;
+	}
+
+	public void insertDelivery(int s_no) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		
+		String sql = " {call pro_delivery(?)} ";
+		
+		try {
+			con = DBConnector.getconn();
+			ps = con.prepareCall(sql);
+			ps.setInt(1, s_no);
+			ps.execute();
+			
+		} catch (Exception e) {
+			System.out.println("insertDelivery 에러!");
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(con, ps, null);
+		}
+	}
+
+	public void updateDelichk(int s_no) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		
+		String sql = "update sales "
+				+ " set "
+				+ "		d_chk = 1 "
+				+ " where s_no = ? ";
+		
+		try {
+			con = DBConnector.getconn();
+			ps = con.prepareStatement(sql);
+			ps.setInt(1, s_no);
+			ps.execute();
+			
+		} catch (Exception e) {
+			System.out.println("updateDelichk 에러!");
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(con, ps, null);
+		}
+		
+	}
+
+	public List<DeliveryVO> getDeliveryList() {
+		List<DeliveryVO> list = new ArrayList<DeliveryVO>();
+		
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		String sql = " select "
+				+"		a.d_no, b.s_date, a.d_date, "  
+				+" 		a.s_no, c.p_no, c.p_name, "
+				+" 		c.p_price, b.s_quantity, b.s_price "
+				+" from delivery a "
+				+" join sales b "
+				+" on a.s_no = b.s_no "
+				+" join product c " 	
+				+" on b.p_no = c.p_no ";  
+	
+		try {
+			con = DBConnector.getconn();
+			ps = con.prepareStatement(sql);
+			rs = ps.executeQuery();
+			
+			while(rs.next()){
+				DeliveryVO vo = new DeliveryVO();
+				vo.setD_no(rs.getInt("d_no"));
+				vo.setS_date(rs.getString("s_date"));
+				vo.setD_date(rs.getString("d_date"));
+				vo.setS_no(rs.getInt("s_no"));
+				vo.setP_no(rs.getInt("p_no"));
+				vo.setP_name(rs.getString("p_name"));
+				vo.setP_price(rs.getInt("p_price"));
+				vo.setS_quantity(rs.getInt("s_quantity"));
+				vo.setS_price(rs.getInt("s_price"));
+				
+				list.add(vo);
+				
+				System.out.printf("%d %s %s %d %d %s %d %d %d\n", 
+						vo.getD_no(), vo.getS_date(), vo.getD_date(), 
+						vo.getS_no(), vo.getP_no(), vo.getP_name(), 
+						vo.getP_price(), vo.getS_quantity(), vo.getS_price());
+			}
+			
+		} catch (Exception e) {
+			System.out.println("getDeliveryList 에러!");
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(con, ps, rs);
+		}
+		
+		return list;
+	}
+
 }

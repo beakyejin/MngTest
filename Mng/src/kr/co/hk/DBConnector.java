@@ -12,7 +12,7 @@ public class DBConnector {
 		try{
 			Class.forName("oracle.jdbc.OracleDriver");
 			con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", 
-					"hr", "hr");
+					"hr", "hkitedu");
 			System.out.println("DB연결 성공!");
 		}catch (Exception e){
 			System.out.println("DB연결 실패!");

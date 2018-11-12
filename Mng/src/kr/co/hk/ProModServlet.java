@@ -7,18 +7,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sun.corba.se.impl.javax.rmi.CORBA.Util;
-
-@WebServlet("/proUpdate")
-public class ProUpdateServlet extends HttpServlet {
+@WebServlet("/proMod")
+public class ProModServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
+
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		ProductDAO dao = ProductDAO.getInstance();
-		int no = dao.getPno();
-		request.setAttribute("no", no);
+		int p_no = Integer.parseInt(request.getParameter("p_no"));
 		
-		Utils.Dispatcher("상품등록", "proUpdate", request, response);
+		ProductDAO dao = ProductDAO.getInstance();
+		ProductVO vo =  dao.getProDetail(p_no);
+		request.setAttribute("vo", vo);
+		
+		Utils.Dispatcher("상품 수정", "proMod", request, response);
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -28,7 +28,7 @@ public class ProUpdateServlet extends HttpServlet {
 		String p_name = request.getParameter("p_name");
 		int p_price = Integer.parseInt(request.getParameter("p_price"));
 		String p_info = request.getParameter("p_info");
-
+		
 		System.out.println("p_no: " + p_no);
 		System.out.println("p_name: " + p_name);
 		System.out.println("p_price: " + p_price);
@@ -41,11 +41,13 @@ public class ProUpdateServlet extends HttpServlet {
 		vo.setP_info(p_info);
 		
 		ProductDAO dao = ProductDAO.getInstance();
-		dao.insertProduct(vo);
+		dao.updateProduct(vo);
 		
-		request.setAttribute("msg", "상품 등록이 완료 되었습니다!");
-		Utils.Dispatcher("상품등록", "proUpdate", request, response);
+		request.setAttribute("p_no", p_no);
+		request.setAttribute("vo", vo);
+		request.setAttribute("msg", "수정이 완료되었습니다.");
+		Utils.Dispatcher("상품 수정", "proMod", request, response);
+		
 	}
 
 }
-

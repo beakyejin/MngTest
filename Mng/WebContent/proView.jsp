@@ -27,7 +27,9 @@
 		</td>
 		<td><%=vo.getP_price() %></td>
 		<td>
-			<input type="button" value="수정" onclick="clkMod(<%=vo.getP_no() %>)" />
+			<div class="btn">
+				<input type="button" value="수정" onclick="clkMod(<%=vo.getP_no() %>)" />
+			</div>
 		</td>
 	</tr>
 	<%} %>
